@@ -13,6 +13,7 @@ from benchmarl.hydra_config import load_experiment_from_hydra
 from football.models.vanilla_model import VanillaModelConfig
 from football.models.deepset_model import DeepSetModelConfig
 from football.models.default_model import DefaultModelConfig
+from football.algorithms.ddpg import DdpgConfig
 
 def update_registries():
     benchmarl.models.model_config_registry.update({
@@ -20,6 +21,10 @@ def update_registries():
         "deepset_model": DeepSetModelConfig,
         "default_model": DefaultModelConfig,
     })
+    benchmarl.algorithms.algorithm_config_registry.update({
+        "ddpg": DdpgConfig,
+    })
+    benchmarl._load_hydra_schemas()
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def hydra_experiment(cfg: DictConfig) -> None:

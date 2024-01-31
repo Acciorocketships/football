@@ -1,6 +1,6 @@
 defaults:
   - experiment: vmas
-  - algorithm: ippo
+  - algorithm: ddpg
   - task: vmas/football
   - model: deepset_model
   - model@critic_model: deepset_model
