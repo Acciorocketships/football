@@ -1,0 +1,15 @@
+defaults:
+  - experiment: vmas
+  - algorithm: ippo
+  - task: vmas/football
+  - model: deepset_model
+  - model@critic_model: deepset_model
+  - _self_
+
+hydra:
+  searchpath:
+   # Tells hydra to add the default benchmarl configuration to its path
+    - pkg://benchmarl/conf
+
+seed: 0
+

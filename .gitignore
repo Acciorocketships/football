@@ -1,0 +1,8 @@
+3rdparty/
+__MACOSX/
+__pycache__/
+.DS_Store
+.idea/
+*.egg-info
+outputs
+multirun

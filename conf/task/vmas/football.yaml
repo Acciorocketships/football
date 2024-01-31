@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - vmas_football_config
+
+max_steps: 256
+ai_red_agents: False
+n_red_agents: 2
+n_blue_agents: 2

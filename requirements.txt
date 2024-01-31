@@ -1,0 +1,3 @@
+sae @ git+https://github.com/Acciorocketships/SetAutoEncoder.git
+vmas @ git+https://github.com/Acciorocketships/VectorizedMultiAgentSimulator.git@saerl
+benchmarl @ git+https://github.com/Acciorocketships/BenchMARL.git@saerl
