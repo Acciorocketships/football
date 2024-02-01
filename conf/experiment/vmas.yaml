@@ -13,7 +13,7 @@ share_policy_params: True # This won't matter as our model ignores it
 prefer_continuous_actions: True
 
 # Discount factor
-gamma: 0.9
+gamma: 0.99
 # Learning rate
 lr: 0.00005
 # Clips grad norm if true and clips grad value if false
@@ -78,7 +78,7 @@ evaluation_interval: 131_072
 # Number of episodes that evaluation is run on
 evaluation_episodes: 200
 # If True, when stochastic policies are evaluated, their mode is taken, otherwise, if False, they are sampled
-evaluation_deterministic_actions: False
+evaluation_deterministic_actions: True
 
 # Absolute path to the folder where the experiment will log.
 # If null, this will default to the hydra output dir (if using hydra) or to the current folder when the script is run (if not).
