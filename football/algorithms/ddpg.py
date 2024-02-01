@@ -22,6 +22,8 @@ from torchrl.objectives import DDPGLoss, LossModule, ValueEstimators
 from benchmarl.algorithms.common import Algorithm, AlgorithmConfig
 from benchmarl.models.common import ModelConfig
 
+from football.util.pink_noise import PinkNoiseWrapper
+
 
 class Ddpg(Algorithm):
     """Same as :class:`~benchmarkl.algorithms.Maddpg` (from `https://arxiv.org/abs/1706.02275 <https://arxiv.org/abs/1706.02275>`__) but with decentralized critics.
@@ -151,14 +153,17 @@ class Ddpg(Algorithm):
     def _get_policy_for_collection(
         self, policy_for_loss: TensorDictModule, group: str, continuous: bool
     ) -> TensorDictModule:
-        return AdditiveGaussianWrapper(
+        return PinkNoiseWrapper(
             policy_for_loss,
+            batch_size=self.experiment_config.off_policy_n_envs_per_worker,
+            seq_len=self.experiment.task.config['max_steps'],
             annealing_num_steps=self.experiment_config.get_exploration_anneal_frames(
                 self.on_policy
             ),
             action_key=(group, "action"),
             sigma_init=self.experiment_config.exploration_eps_init,
             sigma_end=self.experiment_config.exploration_eps_end,
+
         )
 
     def process_batch(self, group: str, batch: TensorDictBase) -> TensorDictBase:
