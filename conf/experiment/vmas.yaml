@@ -78,7 +78,7 @@ evaluation_interval: 131_072
 # Number of episodes that evaluation is run on
 evaluation_episodes: 200
 # If True, when stochastic policies are evaluated, their mode is taken, otherwise, if False, they are sampled
-evaluation_deterministic_actions: True
+evaluation_deterministic_actions: False
 
 # Absolute path to the folder where the experiment will log.
 # If null, this will default to the hydra output dir (if using hydra) or to the current folder when the script is run (if not).
