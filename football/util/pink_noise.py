@@ -76,7 +76,7 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
         sigma = self.sigma.item()
         if action.shape[0] != self.pink_noise.size[0]:
             if self.pink_noise_eval is None:
-                self.pink_noise_eval = ColoredNoiseProcess(size=action.shape[0] + tuple(self._spec[self.action_key].shape), seq_len=self.pink_noise.time_steps)
+                self.pink_noise_eval = ColoredNoiseProcess(size=(action.shape[0],) + tuple(self._spec[self.action_key].shape), seq_len=self.pink_noise.time_steps)
             noise = self.pink_noise_eval.sample(1)[0].to(action.device)
         else:
             noise = self.pink_noise.sample(1)[0].to(action.device)
