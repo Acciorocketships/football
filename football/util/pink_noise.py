@@ -56,6 +56,7 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
         if self.safe:
             self.register_forward_hook(_forward_hook_safe_action)
         self.pink_noise = ColoredNoiseProcess(size=(batch_size,)+tuple(self._spec[self.action_key].shape), seq_len=seq_len)
+        self.pink_noise_eval = None
 
     @property
     def spec(self):
@@ -73,7 +74,12 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
 
     def _add_noise(self, action: torch.Tensor) -> torch.Tensor:
         sigma = self.sigma.item()
-        noise = self.pink_noise.sample(1)[0].to(action.device)
+        if action.shape[0] != self.pink_noise.size[0]:
+            if self.pink_noise_eval is None:
+                self.pink_noise_eval = ColoredNoiseProcess(size=action.shape[0] + tuple(self._spec[self.action_key].shape), seq_len=self.pink_noise.time_steps)
+            noise = self.pink_noise_eval.sample(1)[0].to(action.device)
+        else:
+            noise = self.pink_noise.sample(1)[0].to(action.device)
         action = action + noise * sigma
         spec = self.spec
         spec = spec[self.action_key]
