@@ -1,5 +1,5 @@
 defaults:
-  - experiment: vmas
+  - experiment: experiment
   - algorithm: ddpg
   - task: vmas/football
   - model: deepset_model

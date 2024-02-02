@@ -75,7 +75,7 @@ class DeepSetModel(Model):
         self.output_features = self.output_leaf_spec.shape[-1]
         self.output_shape = (-1, *self.output_leaf_spec.shape)
 
-        self.const_dim = 6
+        self.const_dim = 8
         self.agent_dim = 6
         self.n_team = 0
         self.n_opp = 0

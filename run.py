@@ -10,10 +10,12 @@ from omegaconf import DictConfig, OmegaConf
 
 import benchmarl
 from benchmarl.hydra_config import load_experiment_from_hydra
+from benchmarl.environments.vmas.common import VmasTask
 from football.models.vanilla_model import VanillaModelConfig
 from football.models.deepset_model import DeepSetModelConfig
 from football.models.default_model import DefaultModelConfig
 from football.algorithms.ddpg import DdpgConfig
+from football.util.render_function import render_callback
 
 def update_registries():
     benchmarl.models.model_config_registry.update({
@@ -48,6 +50,8 @@ def hydra_experiment(cfg: DictConfig) -> None:
     print(f"\nAlgorithm: {algorithm_name}, Task: {task_name}")
     print("\nLoaded config:\n")
     print(OmegaConf.to_yaml(cfg))
+
+    VmasTask.render_callback = render_callback
 
     experiment = load_experiment_from_hydra(cfg, task_name=task_name)
     experiment.run()
