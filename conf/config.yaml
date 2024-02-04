@@ -2,8 +2,8 @@ defaults:
   - experiment: experiment
   - algorithm: ddpg
   - task: vmas/football
-  - model: deepset_model
-  - model@critic_model: deepset_model
+  - model: vanilla_model
+  - model@critic_model: vanilla_model
   - _self_
 
 hydra:

@@ -12,11 +12,17 @@ from tensordict import TensorDictBase
 from tensordict.nn import TensorDictModule, TensorDictSequential
 from torchrl.data import CompositeSpec, UnboundedContinuousTensorSpec
 from torchrl.modules import (
-    AdditiveGaussianWrapper,
     Delta,
     ProbabilisticActor,
     TanhDelta,
 )
+from torchrl.data import (
+    LazyTensorStorage,
+    ReplayBuffer,
+    TensorDictReplayBuffer,
+    TensorDictPrioritizedReplayBuffer
+)
+from torchrl.data.replay_buffers import RandomSampler
 from torchrl.objectives import DDPGLoss, LossModule, ValueEstimators
 
 from benchmarl.algorithms.common import Algorithm, AlgorithmConfig
@@ -254,6 +260,31 @@ class Ddpg(Algorithm):
         )
 
         return TensorDictSequential(*modules)
+
+    def get_replay_buffer(
+        self,
+        group: str,
+    ) -> ReplayBuffer:
+        """
+        Get the ReplayBuffer for a specific group.
+        This function will check ``self.on_policy`` and create the buffer accordingly
+
+        Args:
+            group (str): agent group of the loss and updater
+
+        Returns: ReplayBuffer the group
+        """
+        memory_size = self.experiment_config.replay_buffer_memory_size(self.on_policy)
+        sampling_size = self.experiment_config.train_minibatch_size(self.on_policy)
+        storing_device = self.device
+
+        return TensorDictPrioritizedReplayBuffer(
+            alpha=0.7,
+            beta=0.5,
+            storage=LazyTensorStorage(memory_size, device=storing_device),
+            batch_size=sampling_size,
+            priority_key=(group, "td_error"),
+        )
 
 
 @dataclass
