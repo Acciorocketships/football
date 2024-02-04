@@ -75,12 +75,6 @@ class VanillaModel(Model):
         self.input_features = self.input_leaf_spec.shape[-1]
         self.output_features = self.output_leaf_spec.shape[-1]
 
-        self.sae_max_n = 5
-        self.sae_dim = 4
-        self.sae_hidden_dim = 20
-        self.sae_n_agents = 3
-        self.sae_n_obs = 5
-
         # Instantiate a model for this scenario
         # This code will be executed for a policy or for a decentralized critic for example
         self.mlp = MultiAgentMLP(
