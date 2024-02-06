@@ -38,12 +38,12 @@ exploration_eps_init: 0.8
 exploration_eps_end: 0.01
 # Number of frames for annealing of exploration strategy in deterministic policy algorithms
 # If null it will default to max_n_frames
-exploration_anneal_frames: 10
+exploration_anneal_frames: null
 
 # The maximum number of experiment iterations before the experiment terminates, exclusive with max_n_frames
 max_n_iters: null
 # Number of collected frames before ending, exclusive with max_n_iters
-max_n_frames: 32_000_000
+max_n_frames: 32_014_336
 
 # Number of frames collected and each experiment iteration
 on_policy_collected_frames_per_batch: 6000
