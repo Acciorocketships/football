@@ -9,13 +9,21 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 import benchmarl
-from benchmarl.hydra_config import load_experiment_from_hydra
+from benchmarl.experiment import Experiment
+from benchmarl.hydra_config import (
+    load_algorithm_config_from_hydra,
+    load_experiment_config_from_hydra,
+    load_task_config_from_hydra,
+    load_model_config_from_hydra,
+)
+
 from benchmarl.environments.vmas.common import VmasTask
 from football.models.vanilla_model import VanillaModelConfig
 from football.models.deepset_model import DeepSetModelConfig
 from football.models.default_model import DefaultModelConfig
 from football.algorithms.ddpg import DdpgConfig
 from football.util.render_function import render_callback
+from football.util.state_predictor import StatePredictorCallback
 
 def update_registries():
     benchmarl.models.model_config_registry.update({
@@ -28,32 +36,40 @@ def update_registries():
     })
     benchmarl._load_hydra_schemas()
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
-def hydra_experiment(cfg: DictConfig) -> None:
-    """Runs an experiment loading its config from hydra.
-
-    This function is decorated as ``@hydra.main`` and is called by running
-
-    .. code-block:: console
-
-       python benchmarl/run.py algorithm=mappo task=vmas/balance
-
-
-    Args:
-        cfg (DictConfig): the hydra config dictionary
-
-    """
+def get_experiment(cfg: DictConfig) -> Experiment:
     hydra_choices = HydraConfig.get().runtime.choices
     task_name = hydra_choices.task
     algorithm_name = hydra_choices.algorithm
+
+    update_registries()
 
     print(f"\nAlgorithm: {algorithm_name}, Task: {task_name}")
     print("\nLoaded config:\n")
     print(OmegaConf.to_yaml(cfg))
 
+    algorithm_config = load_algorithm_config_from_hydra(cfg.algorithm)
+    experiment_config = load_experiment_config_from_hydra(cfg.experiment)
+    task_config = load_task_config_from_hydra(cfg.task, task_name)
+    critic_model_config = load_model_config_from_hydra(cfg.critic_model)
+    model_config = load_model_config_from_hydra(cfg.model)
+
     VmasTask.render_callback = render_callback
 
-    experiment = load_experiment_from_hydra(cfg, task_name=task_name)
+    experiment = Experiment(
+        task=task_config,
+        algorithm_config=algorithm_config,
+        model_config=model_config,
+        critic_model_config=critic_model_config,
+        seed=cfg.seed,
+        config=experiment_config,
+        # callbacks=[StatePredictorCallback()],
+    )
+    return experiment
+
+
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def hydra_experiment(cfg: DictConfig) -> None:
+    experiment = get_experiment(cfg=cfg)
     experiment.run()
 
 

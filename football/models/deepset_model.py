@@ -77,10 +77,10 @@ class DeepSetModel(Model):
 
         self.const_dim = 8
         self.agent_dim = 6
-        self.n_team = 0
+        self.n_team = self.n_agents-1
         self.n_opp = 0
         self.team_hidden = 4
-        self.opp_hidden = 8
+        self.opp_hidden = 4
         self.mlp_input_features = self.const_dim + self.team_hidden + self.opp_hidden
 
         self.psi_team = MLP(
