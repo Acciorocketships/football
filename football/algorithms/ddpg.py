@@ -167,13 +167,11 @@ class Ddpg(Algorithm):
             policy_for_loss,
             batch_size=self.experiment_config.off_policy_n_envs_per_worker,
             seq_len=self.experiment.task.config['max_steps'],
-            annealing_num_steps=self.experiment_config.get_exploration_anneal_frames(
-                self.on_policy
-            ),
+            annealing_num_steps=self.experiment_config.get_exploration_anneal_frames(self.on_policy),
+            random_num_steps=self.experiment.config.off_policy_init_random_frames / self.experiment.config.off_policy_collected_frames_per_batch,
             action_key=(group, "action"),
             sigma_init=self.experiment_config.exploration_eps_init,
             sigma_end=self.experiment_config.exploration_eps_end,
-
         )
 
     def process_batch(self, group: str, batch: TensorDictBase) -> TensorDictBase:

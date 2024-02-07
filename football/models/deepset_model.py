@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, MISSING
-from typing import Type
+from typing import Sequence
 
 import torch
 
@@ -20,6 +20,7 @@ from torchrl.modules import MLP, MultiAgentMLP
 class DeepSetModel(Model):
     def __init__(
         self,
+        num_cells,
         **kwargs,
     ):
         # Models in BenchMARL are instantiated per agent group.
@@ -109,6 +110,7 @@ class DeepSetModel(Model):
             share_params=self.share_params,
             device=self.device,
             activation_class=self.activation_class,
+            num_cells=num_cells,
         )
 
     def _perform_checks(self):
@@ -158,6 +160,7 @@ class DeepSetModel(Model):
 @dataclass
 class DeepSetModelConfig(ModelConfig):
     # The config parameters for this class, these will be loaded from yaml
+    num_cells: Sequence[int] = MISSING
 
     @staticmethod
     def associated_class():

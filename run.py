@@ -22,8 +22,10 @@ from football.models.vanilla_model import VanillaModelConfig
 from football.models.deepset_model import DeepSetModelConfig
 from football.models.default_model import DefaultModelConfig
 from football.algorithms.ddpg import DdpgConfig
-from football.util.render_function import render_callback
+from football.util.render_value_callback import render_callback
+# from football.util.render_curiosity_callback import render_callback
 from football.util.state_predictor import StatePredictorCallback
+from football.util.log_actions import ActionLoggerCallback
 
 def update_registries():
     benchmarl.models.model_config_registry.update({
@@ -62,7 +64,8 @@ def get_experiment(cfg: DictConfig) -> Experiment:
         critic_model_config=critic_model_config,
         seed=cfg.seed,
         config=experiment_config,
-        # callbacks=[StatePredictorCallback()],
+        callbacks=[ActionLoggerCallback()]
+        + ([StatePredictorCallback()] if algorithm_config.ensemble_size > 0 else [])
     )
     return experiment
 

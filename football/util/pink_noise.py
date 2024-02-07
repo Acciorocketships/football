@@ -20,6 +20,7 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
         sigma_init: float = 1.0,
         sigma_end: float = 0.1,
         annealing_num_steps: int = 1000,
+        random_num_steps: int = 0,
         action_key: Optional[NestedKey] = "action",
         spec: Optional[TensorSpec] = None,
         safe: Optional[bool] = True,
@@ -30,6 +31,7 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
         self.register_buffer("sigma_init", torch.tensor([sigma_init]))
         self.register_buffer("sigma_end", torch.tensor([sigma_end]))
         self.annealing_num_steps = annealing_num_steps
+        self.random_num_steps = random_num_steps
         self.register_buffer("sigma", torch.tensor([sigma_init], dtype=torch.float32))
         self.action_key = action_key
         self.out_keys = list(self.td_module.out_keys)
@@ -57,20 +59,19 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
             self.register_forward_hook(_forward_hook_safe_action)
         self.pink_noise = ColoredNoiseProcess(size=(batch_size,)+tuple(self._spec[self.action_key].shape), seq_len=seq_len)
         self.pink_noise_eval = None
+        self.noise_mag = torch.zeros(1)
+        self.action_mag = torch.zeros(1)
 
     @property
     def spec(self):
         return self._spec
 
     def step(self, frames: int = 1) -> None:
-        for _ in range(frames):
-            self.sigma.data[0] = max(
-                self.sigma_end.item(),
-                (
-                    self.sigma
-                    - (self.sigma_init - self.sigma_end) / self.annealing_num_steps
-                ).item(),
-            )
+        self.sigma.data[0] = max(
+            self.sigma_end.item(),
+            (self.sigma - frames * (self.sigma_init - self.sigma_end) / self.annealing_num_steps).item(),
+        )
+        self.random_num_steps -= 1
 
     def _add_noise(self, action: torch.Tensor) -> torch.Tensor:
         sigma = self.sigma.item()
@@ -80,7 +81,12 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
             noise = self.pink_noise_eval.sample(1)[0].to(action.device)
         else:
             noise = self.pink_noise.sample(1)[0].to(action.device)
-        action = action + noise * sigma
+        self.noise_mag = (noise * sigma).norm(dim=-1).mean()
+        self.action_mag = action.norm(dim=-1).mean()
+        if self.random_num_steps > 0:
+            action = noise * sigma
+        else:
+            action = action + noise * sigma
         spec = self.spec
         spec = spec[self.action_key]
         if spec is not None:

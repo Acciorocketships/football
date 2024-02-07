@@ -13,11 +13,11 @@ share_policy_params: True
 prefer_continuous_actions: True
 
 # Discount factor
-gamma: 0.995
+gamma: 0.99
 # Learning rate
 lr: 0.0001
 lr_start: 0.00000001
-lr_iters: 0
+lr_iters: 10
 # The epsilon parameter of the adam optimizer
 adam_eps: 0.000001
 # Clips grad norm if true and clips grad value if false
@@ -41,9 +41,9 @@ exploration_eps_end: 0.01
 exploration_anneal_frames: null
 
 # The maximum number of experiment iterations before the experiment terminates, exclusive with max_n_frames
-max_n_iters: null
+max_n_iters: 4000
 # Number of collected frames before ending, exclusive with max_n_iters
-max_n_frames: 32_014_336
+max_n_frames: null
 
 # Number of frames collected and each experiment iteration
 on_policy_collected_frames_per_batch: 6000
@@ -58,15 +58,15 @@ on_policy_n_minibatch_iters: 45
 on_policy_minibatch_size: 400
 
 # Number of frames collected and each experiment iteration
-off_policy_collected_frames_per_batch: 16_384
+off_policy_collected_frames_per_batch: 8_192
 # Number of environments used for collection
 # If the environment is vectorized, this will be the number of batched environments.
 # Otherwise batching will be simulated and each env will be run sequentially.
-off_policy_n_envs_per_worker: 32
+off_policy_n_envs_per_worker: 16
 # This is the number of times off_policy_train_batch_size will be sampled from the buffer and trained over.
-off_policy_n_optimizer_steps: 250
+off_policy_n_optimizer_steps: 500
 # Number of frames used for each off_policy_n_optimizer_steps when training off-policy algorithms
-off_policy_train_batch_size: 1024
+off_policy_train_batch_size: 512
 # Maximum number of frames to keep in replay buffer memory for off-policy algorithms
 off_policy_memory_size: 10_000_000
 # Number of random action frames to prefill the replay buffer with
@@ -76,8 +76,8 @@ off_policy_init_random_frames: 0
 evaluation: True
 # Whether to render the evaluation (if rendering is available)
 render: True
-# Frequency of evaluation in terms of collected frames (this should be a multiple of on/off_policy_collected_frames_per_batch)
-evaluation_interval: 81_920
+# Frequency of evaluation in terms of iters
+evaluation_interval: 5
 # Number of episodes that evaluation is run on
 evaluation_episodes: 10
 # If True, when stochastic policies are evaluated, their mode is taken, otherwise, if False, they are sampled
@@ -93,6 +93,6 @@ create_json: True
 save_folder: null
 # Absolute path to a checkpoint file where the experiment was saved. If null the experiment is started fresh.
 restore_file: null
-# Interval for experiment saving in terms of collected frames (this should be a multiple of on/off_policy_collected_frames_per_batch).
+# Interval for experiment saving in terms of iters
 # Set it to 0 to disable checkpointing
-checkpoint_interval: 524_288
+checkpoint_interval: 0
