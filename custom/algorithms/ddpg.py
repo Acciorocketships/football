@@ -5,9 +5,8 @@
 #
 
 from dataclasses import dataclass, MISSING
-from typing import Dict, Iterable, Tuple, Type
+from typing import Dict, Iterable, Tuple, Type, List
 
-import torch
 from tensordict import TensorDictBase
 from tensordict.nn import TensorDictModule, TensorDictSequential
 from torchrl.data import CompositeSpec, UnboundedContinuousTensorSpec
@@ -21,7 +20,7 @@ from torchrl.data import (
     ReplayBuffer,
     TensorDictPrioritizedReplayBuffer
 )
-from torchrl.envs.transforms import Transform
+from torchrl.envs.transforms import Transform, Compose
 from torchrl.objectives import DDPGLoss, LossModule, ValueEstimators
 
 from benchmarl.algorithms.common import Algorithm, AlgorithmConfig
@@ -29,9 +28,8 @@ from benchmarl.models.common import ModelConfig
 
 from custom.util.pink_noise import PinkNoiseWrapper
 
-
 class Ddpg(Algorithm):
-    """Same as :class:`~benchmarkl.algorithms.Maddpg` (from `https://arxiv.org/abs/1706.02275 <https://arxiv.org/abs/1706.02275>`__) but with decentralized critics.
+    """Same as :class:`~benchmarl.algorithms.Maddpg` (from `https://arxiv.org/abs/1706.02275 <https://arxiv.org/abs/1706.02275>`__) but with decentralized critics.
 
     Args:
         share_param_critic (bool): Whether to share the parameters of the critics withing agent groups
@@ -49,7 +47,6 @@ class Ddpg(Algorithm):
         loss_function: str,
         delay_value: bool,
         use_tanh_mapping: bool,
-        ensemble_size: int,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -58,9 +55,6 @@ class Ddpg(Algorithm):
         self.delay_value = delay_value
         self.loss_function = loss_function
         self.use_tanh_mapping = use_tanh_mapping
-        self.ensemble_size = ensemble_size
-
-        self.state_predictor = {}
 
     #############################
     # Overridden abstract methods
@@ -107,16 +101,7 @@ class Ddpg(Algorithm):
             n_agents = len(self.group_map[group])
             logits_shape = list(self.action_spec[group, "action"].shape)
             actor_input_spec = CompositeSpec(
-                {
-                    group: CompositeSpec(
-                        {
-                            "observation": self.observation_spec[group]["observation"]
-                            .clone()
-                            .to(self.device)
-                        },
-                        shape=(n_agents,),
-                    )
-                }
+                {group: self.observation_spec[group].clone().to(self.device)}
             )
             actor_output_spec = CompositeSpec(
                 {
@@ -210,27 +195,11 @@ class Ddpg(Algorithm):
         n_agents = len(self.group_map[group])
         modules = []
 
-        modules.append(
-            TensorDictModule(
-                lambda obs, action: torch.cat([obs, action], dim=-1),
-                in_keys=[(group, "observation"), (group, "action")],
-                out_keys=[(group, "obs_action")],
-            )
-        )
         critic_input_spec = CompositeSpec(
             {
-                group: CompositeSpec(
-                    {
-                        "obs_action": UnboundedContinuousTensorSpec(
-                            shape=(
-                                n_agents,
-                                self.observation_spec[group, "observation"].shape[-1]
-                                + self.action_spec[group, "action"].shape[-1],
-                            )
-                        )
-                    },
-                    shape=(n_agents,),
-                )
+                group: self.observation_spec[group]
+                .clone()
+                .update(self.action_spec[group])
             }
         )
         critic_output_spec = CompositeSpec(
@@ -265,6 +234,7 @@ class Ddpg(Algorithm):
     def get_replay_buffer(
         self,
         group: str,
+        transforms: List[Transform] = None,
     ) -> ReplayBuffer:
         """
         Get the ReplayBuffer for a specific group.
@@ -284,7 +254,7 @@ class Ddpg(Algorithm):
             beta=0.5,
             storage=LazyTensorStorage(memory_size, device=storing_device),
             batch_size=sampling_size,
-            transform=self.get_intrinsic_reward_transform(group),
+            transform=Compose(*transforms) if transforms is not None else None,
             priority_key=(group, "td_error"),
         )
 
@@ -302,7 +272,7 @@ class Ddpg(Algorithm):
         #
         # class IntrinsicRewardTransform(Transform):
         #     def __init__(this, c=0.01, **kwargs):
-        #         super().__init__(in_keys=[observation_key, action_key, reward_key], out_keys=[reward_key], **kwargs)
+        #         super().__init__(in_keys=[observation_key, action_key, reward_key], out_keys=[reward_key, intrinsic_reward_key], **kwargs)
         #
         #     def forward(this, tensordict: TensorDictBase) -> TensorDictBase:
         #         return tensordict
@@ -319,7 +289,6 @@ class DdpgConfig(AlgorithmConfig):
     loss_function: str = MISSING
     delay_value: bool = MISSING
     use_tanh_mapping: bool = MISSING
-    ensemble_size: int = MISSING
 
     @staticmethod
     def associated_class() -> Type[Algorithm]:
