@@ -9,3 +9,9 @@ disable_ai_red: True
 ball_mass: 0.25
 ai_strength: 0.5
 observe_teammates: True
+observe_adversaries: True
+dict_obs: False
+only_closest_agent_ball_reward: False
+enable_shooting: False
+ball_max_speed: 0.3
+u_shoot_multiplier: 0.25

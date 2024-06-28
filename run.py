@@ -58,7 +58,7 @@ def get_experiment(cfg: DictConfig) -> Experiment:
         critic_model_config=critic_model_config,
         seed=cfg.seed,
         config=experiment_config,
-        callbacks=[ActionLoggerCallback()]
+        callbacks=[]
     )
     return experiment
 

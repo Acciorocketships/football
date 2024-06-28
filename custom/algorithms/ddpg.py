@@ -28,7 +28,6 @@ from benchmarl.algorithms.common import Algorithm, AlgorithmConfig
 from benchmarl.models.common import ModelConfig
 
 from custom.util.pink_noise import PinkNoiseWrapper
-from custom.util.state_predictor import StatePredictor
 
 
 class Ddpg(Algorithm):
