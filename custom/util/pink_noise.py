@@ -72,6 +72,7 @@ class PinkNoiseWrapper(TensorDictModuleWrapper):
             (self.sigma - frames * (self.sigma_init - self.sigma_end) / self.annealing_num_steps).item(),
         )
         self.random_num_steps -= 1
+        self.random_num_steps = max(self.random_num_steps, 0)
 
     def _add_noise(self, action: torch.Tensor) -> torch.Tensor:
         sigma = self.sigma.item()

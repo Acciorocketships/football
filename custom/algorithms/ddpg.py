@@ -27,8 +27,8 @@ from torchrl.objectives import DDPGLoss, LossModule, ValueEstimators
 from benchmarl.algorithms.common import Algorithm, AlgorithmConfig
 from benchmarl.models.common import ModelConfig
 
-from football.util.pink_noise import PinkNoiseWrapper
-from football.util.state_predictor import StatePredictor
+from custom.util.pink_noise import PinkNoiseWrapper
+from custom.util.state_predictor import StatePredictor
 
 
 class Ddpg(Algorithm):
@@ -294,48 +294,21 @@ class Ddpg(Algorithm):
             group,
     ) -> Transform:
 
-        if self.ensemble_size == 0:
-            return None
+        return None
 
-        observation_key = (group, "observation")
-        action_key = (group, "action")
-        reward_key = ("next", group, "reward")
-        intrinsic_reward_key = ("next", group, "intrinsic_reward")
-
-        in_dim = self.observation_spec[group, "observation"].shape[-1] + self.action_spec[group, "action"].shape[-1]
-        out_dim = 2 * self.observation_spec[group, "observation"].shape[-1]
-        ensemble = torch.nn.ModuleList([
-            torch.nn.Sequential(
-                torch.nn.Linear(in_dim, (in_dim+out_dim)//2),
-                torch.nn.Mish(),
-                torch.nn.Linear((in_dim+out_dim)//2, (in_dim+out_dim)//2),
-                torch.nn.Mish(),
-                torch.nn.Linear((in_dim+out_dim)//2,out_dim)
-            ) for _ in range(self.ensemble_size)
-        ])
-
-        state_predictor = StatePredictor(
-            observation_key=observation_key,
-            action_key=action_key,
-            intrinsic_reward_key=intrinsic_reward_key,
-            ensemble=ensemble
-        )
-        self.state_predictor[group] = state_predictor
-
-        class IntrinsicRewardTransform(Transform):
-            def __init__(this, c=0.01, **kwargs):
-                super().__init__(in_keys=[observation_key, action_key, reward_key], out_keys=[reward_key], **kwargs)
-                this.state_predictor = state_predictor
-                this.reward_key = reward_key
-                this.c = c
-
-            def forward(this, tensordict: TensorDictBase) -> TensorDictBase:
-                this.state_predictor(tensordict)
-                new_rew = tensordict.get(this.reward_key) + this.c * tensordict.get(this.state_predictor.intrinsic_reward_key)
-                tensordict.set(this.reward_key, new_rew)
-                return tensordict
-
-        return IntrinsicRewardTransform(c=0.001)
+        # observation_key = (group, "observation")
+        # action_key = (group, "action")
+        # reward_key = ("next", group, "reward")
+        # intrinsic_reward_key = ("next", group, "intrinsic_reward")
+        #
+        # class IntrinsicRewardTransform(Transform):
+        #     def __init__(this, c=0.01, **kwargs):
+        #         super().__init__(in_keys=[observation_key, action_key, reward_key], out_keys=[reward_key], **kwargs)
+        #
+        #     def forward(this, tensordict: TensorDictBase) -> TensorDictBase:
+        #         return tensordict
+        #
+        # return IntrinsicRewardTransform(c=0.001)
 
 
 

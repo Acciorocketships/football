@@ -1,9 +1,9 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="football",
+    name="rl",
     version="0.0.1",
-    description="VMAS Football with Benchmarl",
+    description="Reinforcement Learning",
     author="Ryan Kortvelesy",
     author_email="rk627@cam.ac.uk",
     packages=find_packages(),

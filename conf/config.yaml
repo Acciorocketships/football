@@ -1,9 +1,9 @@
 defaults:
   - experiment: experiment
-  - algorithm: ddpg
+  - algorithm: mappo
   - task: vmas/football
-  - model: vanilla_model
-  - model@critic_model: vanilla_model
+  - model: layers/mlp
+  - model@critic_model: layers/mlp
   - _self_
 
 hydra:
@@ -12,4 +12,4 @@ hydra:
     - pkg://benchmarl/conf
 
 seed: 0
-
+n_frames_add_adversary: 30_000_000

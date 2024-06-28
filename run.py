@@ -18,19 +18,13 @@ from benchmarl.hydra_config import (
 )
 
 from benchmarl.environments.vmas.common import VmasTask
-from football.models.vanilla_model import VanillaModelConfig
-from football.models.deepset_model import DeepSetModelConfig
-from football.models.default_model import DefaultModelConfig
-from football.algorithms.ddpg import DdpgConfig
-from football.util.render_value_callback import render_callback
-# from football.util.render_curiosity_callback import render_callback
-from football.util.state_predictor import StatePredictorCallback
-from football.util.log_actions import ActionLoggerCallback
+from custom.models.default_model import DefaultModelConfig
+from custom.algorithms.ddpg import DdpgConfig
+# from custom.util.render_value_callback import render_callback
+from custom.util.log_actions import ActionLoggerCallback
 
 def update_registries():
     benchmarl.models.model_config_registry.update({
-        "vanilla_model": VanillaModelConfig,
-        "deepset_model": DeepSetModelConfig,
         "default_model": DefaultModelConfig,
     })
     benchmarl.algorithms.algorithm_config_registry.update({
@@ -55,7 +49,7 @@ def get_experiment(cfg: DictConfig) -> Experiment:
     critic_model_config = load_model_config_from_hydra(cfg.critic_model)
     model_config = load_model_config_from_hydra(cfg.model)
 
-    VmasTask.render_callback = render_callback
+    # VmasTask.render_callback = render_callback
 
     experiment = Experiment(
         task=task_config,
@@ -65,7 +59,6 @@ def get_experiment(cfg: DictConfig) -> Experiment:
         seed=cfg.seed,
         config=experiment_config,
         callbacks=[ActionLoggerCallback()]
-        + ([StatePredictorCallback()] if algorithm_config.ensemble_size > 0 else [])
     )
     return experiment
 
