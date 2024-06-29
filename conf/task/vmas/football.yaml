@@ -15,3 +15,5 @@ only_closest_agent_ball_reward: False
 enable_shooting: False
 ball_max_speed: 0.3
 u_shoot_multiplier: 0.25
+pos_shaping_factor_agent_ball: 0.0
+pos_shaping_factor_ball_goal: 1.0

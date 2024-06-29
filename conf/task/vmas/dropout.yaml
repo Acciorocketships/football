@@ -1,0 +1,8 @@
+defaults:
+  - vmas_dropout_config
+  - _self_
+
+max_steps: 250
+n_agents: 1
+energy_coeff: 0.00
+start_same_point: False
