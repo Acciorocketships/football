@@ -98,5 +98,5 @@ class EmpowermentCuriosity(nn.Module):
 			plot_position_function_cmap_alpha=0.5,
 			env_index=env_index,
 			plot_position_function_precision=0.05,
-			plot_position_function_cmap_range=[-1.,1.],
+			# plot_position_function_cmap_range=[-1.,1.],
 		)
