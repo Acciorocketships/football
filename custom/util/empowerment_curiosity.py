@@ -83,7 +83,8 @@ class EmpowermentCuriosity(nn.Module):
 
 	def render(self, experiment, env, data):
 		env_index = 0
-		agent = env.blue_agents[0]
+		breakpoint()
+		agent = env.agents[0]
 
 		def f(pos):
 			obs = env.observation(agent, agent_pos=torch.tensor(pos), env_index=env_index)
