@@ -65,7 +65,7 @@ def get_experiment(cfg: DictConfig) -> Experiment:
 
     intrinsic_rewards = IntrinsicRewards(experiment, empowerment_coeff=1.)
     intrinsic_rewards.experiment = experiment
-    VmasTask.render_callback = intrinsic_rewards.render
+    VmasTask.render_callback = intrinsic_rewards.empowerment_curiosity.render
     experiment.callbacks += [intrinsic_rewards]
 
     return experiment
