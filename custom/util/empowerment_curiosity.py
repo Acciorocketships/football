@@ -24,10 +24,10 @@ class EmpowermentCuriosity(nn.Module):
 			device=device,
 			activation_class=nn.Mish,
 		)
-		self.batchnorm = nn.BatchNorm1d(1, eps=1e-7)
+		self.batchnorm = nn.BatchNorm1d(1, eps=1e-7, device=device)
 		self.optim = optim.Adam(self.Ptrans.parameters(), lr=1e-5)
 		if act_spec.shape[-1] == 2:
-			t = torch.arange(n_samples) * (2 * torch.pi) / n_samples
+			t = torch.arange(n_samples, device=device) * (2 * torch.pi) / n_samples
 			self.action_samples = torch.stack([torch.cos(t), torch.sin(t)], dim=-1)
 			self.action_samples[1::2] *= 0.5
 		else:
@@ -51,7 +51,6 @@ class EmpowermentCuriosity(nn.Module):
 		return Ixa
 
 	def forward(self, obs):
-		self.action_samples = self.action_samples.to(obs.device)
 		n_agents = obs.shape[1]
 		obs_expanded = obs.unsqueeze(1).repeat(1,self.action_samples.shape[0],1,1)
 		action_expanded = self.action_samples.unsqueeze(0).unsqueeze(2).repeat(obs.shape[0], 1, obs.shape[1], 1)
