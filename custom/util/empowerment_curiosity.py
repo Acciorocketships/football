@@ -74,5 +74,6 @@ class EmpowermentCuriosity(nn.Module):
 		loss = -next_obs_dist.log_prob(next_obs).mean()
 		loss.backward()
 		self.optim.step()
-		breakpoint()
-		return {"transition_model_loss": loss.item()}
+		err = torch.abs(logits[...,0] - next_obs).mean()
+		var = torch.exp(logits[..., 1]).mean()
+		return {"transition_model_loss": loss.item(), "transition_model_error": err.item(), "transition_model_var": var.item()}
