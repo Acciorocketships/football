@@ -40,7 +40,7 @@ class EmpowermentCuriosity(nn.Module):
 		# Hxa = dist.entropy().mean(dim=-1)
 		# To approximate H(x) (because it is a mixture of gaussians), we use the 0th order approximation
 		# from https://www.researchgate.net/publication/224338003_On_Entropy_Approximation_for_Gaussian_Mixture_Random_Vectors
-		weights = Categorical(torch.ones(dist.loc.shape[:-1]))
+		weights = Categorical(torch.ones(dist.loc.shape[:-1], device=dist.loc.device))
 		mixture_dist = MixtureSameFamily(weights, dist)
 		batch_shape = (1,) + tuple(mixture_dist.batch_shape)
 		mixture_dist = mixture_dist.expand(batch_shape)
