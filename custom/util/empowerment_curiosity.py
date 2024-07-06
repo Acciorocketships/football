@@ -87,7 +87,7 @@ class EmpowermentCuriosity(nn.Module):
 		agent = env.scenario.blue_agents[0]
 		def f(pos):
 			obs = env.scenario.observation(agent, agent_pos=torch.tensor(pos, device=experiment.config.sampling_device), env_index=env_index)
-			obs = obs.unsqueeze(1).expand(1,self.Ptrans.n_agents,1)
+			obs = obs.unsqueeze(1).expand(-1,self.Ptrans.n_agents,-1)
 			mi = self.forward(obs)
 			return mi[:,0]
 
