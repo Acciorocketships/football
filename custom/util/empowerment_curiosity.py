@@ -72,5 +72,6 @@ class EmpowermentCuriosity(nn.Module):
 			cov_factor=torch.zeros(logits.shape[:-1], device=obs.device).unsqueeze(-1)
 		)
 		loss = -next_obs_dist.log_prob(next_obs).mean()
+		self.experiment.logger.log({"transition_model_loss": loss.item()})
 		loss.backward()
 		self.optim.step()
