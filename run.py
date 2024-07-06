@@ -20,6 +20,8 @@ from benchmarl.hydra_config import (
 from benchmarl.environments.vmas.common import VmasTask
 from custom.models.default_model import DefaultModelConfig
 from custom.algorithms.ddpg import DdpgConfig
+from custom.algorithms.ppo import PPOConfig
+from custom.util.intrinsic_reward_callback import IntrinsicRewards
 # from custom.util.render_value_callback import render_callback
 from custom.util.log_actions import ActionLoggerCallback
 
@@ -29,6 +31,7 @@ def update_registries():
     })
     benchmarl.algorithms.algorithm_config_registry.update({
         "ddpg": DdpgConfig,
+        "ppo": PPOConfig,
     })
     benchmarl._load_hydra_schemas()
 
@@ -50,7 +53,6 @@ def get_experiment(cfg: DictConfig) -> Experiment:
     model_config = load_model_config_from_hydra(cfg.model)
 
     # VmasTask.render_callback = render_callback
-
     experiment = Experiment(
         task=task_config,
         algorithm_config=algorithm_config,
@@ -60,6 +62,10 @@ def get_experiment(cfg: DictConfig) -> Experiment:
         config=experiment_config,
         callbacks=[]
     )
+
+    intrinsic_rewards = IntrinsicRewards(experiment, empowerment_coeff=1.)
+    experiment.callbacks += [intrinsic_rewards]
+
     return experiment
 
 
