@@ -74,4 +74,5 @@ class EmpowermentCuriosity(nn.Module):
 		loss = -next_obs_dist.log_prob(next_obs).mean()
 		loss.backward()
 		self.optim.step()
+		breakpoint()
 		return {"transition_model_loss": loss.item()}
