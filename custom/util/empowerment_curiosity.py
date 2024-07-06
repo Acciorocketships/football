@@ -56,7 +56,7 @@ class EmpowermentCuriosity(nn.Module):
 		next_obs_dist = LowRankMultivariateNormal(
 			loc=logits[...,0],
 			cov_diag=torch.exp(logits[...,1]),
-			cov_factor=torch.zeros(logits.shape[:-1]).unsqueeze(-1)
+			cov_factor=torch.zeros(logits.shape[:-1], device=obs.device).unsqueeze(-1)
 		)
 		mi = self.mutual_information(next_obs_dist)
 		mi = self.batchnorm(mi.view(-1,1)).view(mi.shape)
@@ -69,7 +69,7 @@ class EmpowermentCuriosity(nn.Module):
 		next_obs_dist = LowRankMultivariateNormal(
 			loc=logits[..., 0],
 			cov_diag=torch.exp(logits[..., 1]),
-			cov_factor=torch.zeros(logits.shape[:-1]).unsqueeze(-1)
+			cov_factor=torch.zeros(logits.shape[:-1], device=obs.device).unsqueeze(-1)
 		)
 		loss = -next_obs_dist.log_prob(next_obs).mean()
 		loss.backward()
