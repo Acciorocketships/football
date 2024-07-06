@@ -48,4 +48,5 @@ class IntrinsicRewards(Callback):
             obs = training_td.get(self.obs_key)
             action = training_td.get(self.action_key)
             next_obs = training_td.get(self.next_obs_key)
-            self.empowerment_curiosity.train_model(obs, action, next_obs)
+            logs = self.empowerment_curiosity.train_model(obs, action, next_obs)
+            self.experiment.logger.log(logs)
