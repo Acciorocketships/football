@@ -64,6 +64,7 @@ def get_experiment(cfg: DictConfig) -> Experiment:
     )
 
     intrinsic_rewards = IntrinsicRewards(experiment, empowerment_coeff=1.)
+    intrinsic_rewards.experiment = experiment
     experiment.callbacks += [intrinsic_rewards]
 
     return experiment
