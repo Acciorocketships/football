@@ -6,6 +6,8 @@ from torch.distributions.categorical import Categorical
 from torchrl.modules import MultiAgentMLP
 from torch import optim
 
+visualise = (not torch.cuda.is_available())
+
 class EmpowermentCuriosity(nn.Module):
 
 	def __init__(self, obs_spec, act_spec, device, n_samples=16):
@@ -49,10 +51,11 @@ class EmpowermentCuriosity(nn.Module):
 		return Ixa
 
 	def forward(self, obs):
+		n_agents = obs.shape[1]
 		obs_expanded = obs.unsqueeze(1).repeat(1,self.action_samples.shape[0],1,1)
 		action_expanded = self.action_samples.unsqueeze(0).unsqueeze(2).repeat(obs.shape[0], 1, obs.shape[1], 1)
 		obs_action = torch.cat([obs_expanded, action_expanded], dim=-1)
-		logits = self.Ptrans(obs_action).view(-1, self.action_samples.shape[0], self.n_agents, self.output_features//2, 2).permute(0,2,1,3,4)
+		logits = self.Ptrans(obs_action).view(-1, self.action_samples.shape[0], n_agents, self.output_features//2, 2).permute(0,2,1,3,4)
 		next_obs_dist = LowRankMultivariateNormal(
 			loc=logits[...,0],
 			cov_diag=torch.exp(logits[...,1]),
@@ -77,3 +80,24 @@ class EmpowermentCuriosity(nn.Module):
 		err = torch.abs(logits[...,0] - next_obs).mean()
 		var = torch.exp(logits[..., 1]).mean()
 		return {"transition_model_loss": loss.item(), "transition_model_error": err.item(), "transition_model_var": var.item()}
+
+	def render(self, experiment, env, data):
+		env_index = 0
+		agent = env.blue_agents[0]
+
+		def f(pos):
+			obs = env.observation(agent, agent_pos=torch.tensor(pos), env_index=env_index)
+			obs = obs.unsqueeze(1)
+			mi = self.forward(obs)
+			return mi[:,0]
+
+		return env.render(
+			mode="rgb_array",
+			visualize_when_rgb=visualise,
+			plot_position_function=f,
+			plot_position_function_range=(1.5, 0.75),
+			plot_position_function_cmap_alpha=0.5,
+			env_index=env_index,
+			plot_position_function_precision=0.05,
+			plot_position_function_cmap_range=[-1.,1.],
+		)
