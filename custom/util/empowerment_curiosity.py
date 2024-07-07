@@ -88,7 +88,6 @@ class EmpowermentCuriosity(nn.Module):
 			obs = env.scenario.observation(agent, agent_pos=torch.tensor(pos, device=experiment.config.sampling_device), env_index=env_index)
 			obs = obs.unsqueeze(1).expand(-1,self.Ptrans.n_agents,-1).float()
 			mi = self.forward(obs)
-			breakpoint()
 			return mi[:,0]
 
 		return env.render(
@@ -99,5 +98,5 @@ class EmpowermentCuriosity(nn.Module):
 			plot_position_function_cmap_alpha=1.0,
 			env_index=env_index,
 			plot_position_function_precision=0.025,
-			# plot_position_function_cmap_range=[-1.,1.],
+			plot_position_function_cmap_range=[-1.,1.],
 		)
