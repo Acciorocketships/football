@@ -5,6 +5,7 @@ from torch.distributions.mixture_same_family import MixtureSameFamily
 from torch.distributions.categorical import Categorical
 from torchrl.modules import MultiAgentMLP
 from torch import optim
+from vmas.simulator.rendering import render_function_util
 
 visualise = (not torch.cuda.is_available())
 
@@ -90,13 +91,22 @@ class EmpowermentCuriosity(nn.Module):
 			mi = self.forward(obs)
 			return mi[:,0]
 
-		return env.render(
-			mode="rgb_array",
-			visualize_when_rgb=visualise,
-			plot_position_function=f,
-			plot_position_function_range=(1.5, 0.75),
-			plot_position_function_cmap_alpha=1.0,
-			env_index=env_index,
-			plot_position_function_precision=0.025,
-			plot_position_function_cmap_range=[-1.,1.],
+		geom = render_function_util(
+			f=f,
+			precision=0.025,
+			plot_range=(1.5, 0.75),
+			cmap_range=(-1.,1.),
+			cmap_alpha=0.5,
 		)
+		return geom
+
+		# return env.render(
+		# 	mode="rgb_array",
+		# 	visualize_when_rgb=visualise,
+		# 	plot_position_function=f,
+		# 	plot_position_function_range=(1.5, 0.75),
+		# 	plot_position_function_cmap_alpha=1.0,
+		# 	env_index=env_index,
+		# 	plot_position_function_precision=0.025,
+		# 	plot_position_function_cmap_range=[-1.,1.],
+		# )
